@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baitur Rafi Prayer Times</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --accent-blue: #007bff;
+            --text-main: #ffffff;
+            --text-gold: #ffcc00;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2vh;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin: 0;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #current-date {
+            font-size: 1.8rem;
+            opacity: 0.8;
+        }
+
+        .container {
+            width: 90vw;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .prayer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 20px 60px;
+            border-radius: 15px;
+            border-left: 10px solid var(--accent-blue);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .prayer-name {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .prayer-time {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--text-gold);
+        }
+
+        .footer-logo {
+            margin-top: 3vh;
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Baitur Rafi Milton</h1>
+        <div id="current-date">Loading date...</div>
+    </div>
+
+    <div class="container" id="prayer-list">
+        </div>
+
+    <div class="footer-logo">Ahmadiyya Muslim Community</div>
+
+    <script>
+        // REPLACE THIS with your "Publish to Web" CSV Link
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSFMvKBJNGT8t871i0lOlAow6ZPSuFRTHG8utgGETh67X06Ad8aoE3W2SviceYlpuUX2b5BKA6ouKJW/pub?output=csv';
+
+        async function updateTimes() {
+            try {
+                const response = await fetch(csvUrl);
+                const data = await response.text();
+                // Split rows and filter out any empty lines
+                const rows = data.split('\n').filter(row => row.trim() !== '');
+                
+                let html = '';
+                
+                // Start from index 1 to skip the "Prayer / Time" header
+                // and go to index 5 for the 5 prayers (Fajr to Isha)
+                for (let i = 1; i <= 5; i++) {
+                    const columns = rows[i].split(',');
+                    const name = columns[0].trim();
+                    const time = columns[1].trim();
+
+                    html += `
+                        <div class="prayer-row">
+                            <span class="prayer-name">${name}</span>
+                            <span class="prayer-time">${time}</span>
+                        </div>`;
+                }
+
+                document.getElementById('prayer-list').innerHTML = html;
+                document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-CA', { 
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        updateTimes();
+        // Refresh data every 10 minutes to stay synced with your sheet
+        setInterval(updateTimes, 600000);
+    </script>
+</body>
+</html>
